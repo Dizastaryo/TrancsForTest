@@ -8,3 +8,6 @@ docker-compose up --build
 откройте в браузере: http://localhost:8081.
 Ползователь: Dizastars
 пароль: Dizastars
+
+Не нашел открытый api банков, поэтому взял свой каспи 
+выписку через excel и использовал ее.
