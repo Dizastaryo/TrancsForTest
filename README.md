@@ -6,3 +6,5 @@ mvn spring-boot:run
 docker-compose up --build
 
 откройте в браузере: http://localhost:8081.
+Ползователь: Dizastars
+пароль: Dizastars
