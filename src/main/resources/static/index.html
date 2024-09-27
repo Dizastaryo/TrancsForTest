@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Финансовое приложение</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1, h2, h3 { color: #333; }
+        button { margin: 5px; padding: 10px 15px; }
+        .response { margin-top: 20px; }
+        .error { color: red; }
+        .success { color: green; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Финансовое приложение</h1>
+
+    <h2>Кнопки для API запросов</h2>
+    <button id="getCurrentExchangeRates">Получить текущие курсы обмена</button>
+    <button id="getAccountBalance">Получить баланс аккаунта</button>
+    <button id="addTransaction">Добавить транзакцию</button>
+    <button id="uploadTransactions">Загрузить транзакции</button>
+    <button id="getExceedingLimitTransactions">Получить транзакции, превышающие лимит</button>
+    <button id="setTransactionLimit">Установить лимит</button>
+    <button id="getAllTransactions">Получить все транзакции</button>
+    <button id="getAllLimits">Получить все лимиты</button>
+
+    <div class="response" id="responseMessage"></div>
+
+    <script>
+        $(document).ready(function () {
+            function createTable(data) {
+                let table = '<table>';
+                // Если data - массив объектов
+                if (Array.isArray(data)) {
+                    const keys = Object.keys(data[0]);
+                    table += '<thead><tr>';
+                    keys.forEach(key => {
+                        table += `<th>${key}</th>`;
+                    });
+                    table += '</tr></thead><tbody>';
+                    data.forEach(item => {
+                        table += '<tr>';
+                        keys.forEach(key => {
+                            table += `<td>${item[key]}</td>`;
+                        });
+                        table += '</tr>';
+                    });
+                    table += '</tbody>';
+                } else { // Если это просто объект
+                    table += '<tbody><tr>';
+                    for (const key in data) {
+                        table += `<td>${key}: ${data[key]}</td>`;
+                    }
+                    table += '</tr></tbody>';
+                }
+                table += '</table>';
+                return table;
+            }
+
+            // Получить текущие курсы обмена
+            $('#getCurrentExchangeRates').on('click', function () {
+                $.get('/api/exchange-rates/current', function (data) {
+                    $('#responseMessage').html(createTable(data));
+                }).fail(function (xhr) {
+                    $('#responseMessage').text("Ошибка: " + xhr.responseText).addClass('error');
+                });
+            });
+
+            // Получить баланс аккаунта
+            $('#getAccountBalance').on('click', function () {
+                $.get('/api/financial/balance', function (data) {
+                    $('#responseMessage').html(createTable({ 'Баланс': data + " USD" })).addClass('success');
+                }).fail(function (xhr) {
+                    $('#responseMessage').text("Ошибка: " + xhr.responseText).addClass('error');
+                });
+            });
+
+            // Добавить транзакцию
+            $('#addTransaction').on('click', function () {
+                const amount = prompt("Введите сумму:");
+                const operation = prompt("Введите операцию (Покупка/Пополнение):");
+                const details = prompt("Введите детали:");
+                const currency = prompt("Введите валюту:");
+
+                $.post('/api/financial/transactions/add-current-date', {
+                    amount: amount,
+                    operation: operation,
+                    details: details,
+                    currency: currency
+                }).done(function (response) {
+                    $('#responseMessage').html(createTable(response)).addClass('success');
+                }).fail(function (xhr) {
+                    $('#responseMessage').text("Ошибка: " + xhr.responseText).addClass('error');
+                });
+            });
+
+            // Загрузить транзакции
+            $('#uploadTransactions').on('click', function () {
+                $.post('/api/financial/transactions/upload-fixed', function (response) {
+                    $('#responseMessage').html(createTable(response)).addClass('success');
+                }).fail(function (xhr) {
+                    $('#responseMessage').text("Ошибка: " + xhr.responseText).addClass('error');
+                });
+            });
+
+            // Получить транзакции, превышающие лимит
+            $('#getExceedingLimitTransactions').on('click', function () {
+                $.get('/api/financial/transactions/exceeding-limit', function (data) {
+                    $('#responseMessage').html(createTable(data));
+                }).fail(function (xhr) {
+                    $('#responseMessage').text("Ошибка: " + xhr.responseText).addClass('error');
+                });
+            });
+
+            // Установить лимит
+            $('#setTransactionLimit').on('click', function () {
+                const amount = prompt("Введите сумму лимита:");
+                $.post('/api/financial/transactions/set-limit', { amount: amount })
+                    .done(function (response) {
+                        $('#responseMessage').html(createTable(response)).addClass('success');
+                    }).fail(function (xhr) {
+                    $('#responseMessage').text("Ошибка: " + xhr.responseText).addClass('error');
+                });
+            });
+
+            // Получить все транзакции
+            $('#getAllTransactions').on('click', function () {
+                $.get('/api/financial/transactions/all', function (data) {
+                    $('#responseMessage').html(createTable(data));
+                }).fail(function (xhr) {
+                    $('#responseMessage').text("Ошибка: " + xhr.responseText).addClass('error');
+                });
+            });
+
+            // Получить все лимиты
+            $('#getAllLimits').on('click', function () {
+                $.get('/api/limits/all', function (data) {
+                    $('#responseMessage').html(createTable(data));
+                }).fail(function (xhr) {
+                    $('#responseMessage').text("Ошибка: " + xhr.responseText).addClass('error');
+                });
+            });
+        });
+    </script>
+</div>
+</body>
+</html>
+
+

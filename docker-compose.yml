@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/trancat
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 3721
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: trancat
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 3721
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
